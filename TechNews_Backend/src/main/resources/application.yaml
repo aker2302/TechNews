@@ -1,6 +1,10 @@
 server:
   port: 8090
 
+api:
+  key:
+    authentication: test_api_key
+
 spring:
   data:
     mongodb:
@@ -10,3 +14,6 @@ spring:
       database: TechNews-dev
       port: 27017
       host: localhost
+  application:
+    name: TechNews_Backend
+
