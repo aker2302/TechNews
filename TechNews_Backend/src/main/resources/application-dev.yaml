@@ -1,0 +1,33 @@
+server:
+  port: 8090
+
+spring:
+  spring:
+    config:
+      activate:
+        on-profile: dev
+  data:
+    mongodb:
+      authentication-database: admin
+      username: root
+      password: adminadmin
+      database: TechNews-dev
+      port: 27017
+      host: localhost
+  application:
+    name: TechNews_Backend
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  mail:
+    default-encoding: UTF-8
+    host: smtp.gmail.com
+    username: ${EMAIL_ADDRESS}
+    password: ${EMAIL_ACCESS_TOKEN}
+    port: ${EMAIL_SERVICE_PORT}
+    protocol: smtp
+    properties.mail.smtp:
+      auth: true
+      starttls.enable: true
+      ssl.trust: smtp.gmail.com
+
