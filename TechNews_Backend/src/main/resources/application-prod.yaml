@@ -1,0 +1,32 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+  data:
+    mongodb:
+      authentication-database: ${PROD_DB_AUTH}
+      username: ${PROD_DB_USERNAME}
+      password: ${PROD_DB_PASSWORD}
+      database: ${PROD_DB_NAME}
+      port: ${PROD_DB_PORT}
+      host: ${PROD_DB_HOST}
+  application:
+    name: TechNews_Backend
+  mail:
+    default-encoding: UTF-8
+    host: smtp.gmail.com
+    username: ${EMAIL_ADDRESS}
+    password: ${EMAIL_ACCESS_TOKEN}
+    port: ${EMAIL_SERVICE_PORT}
+    protocol: smtp
+    properties.mail.smtp:
+      auth: true
+      starttls.enable: true
+      ssl.trust: smtp.gmail.com
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  security:
+    user:
+      name: ${USER_NAME_LOGIN}
+      password: ${PASSWORD_LOGIN}
