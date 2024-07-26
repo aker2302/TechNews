@@ -20,8 +20,8 @@ public class RateLimiterCustomConfig {
     public RateLimiter rateLimiterCustomConfig(){
         RateLimiterConfig rateLimiterConfig = RateLimiterConfig.custom()
                 .limitForPeriod(15)
-                .limitRefreshPeriod(Duration.of(15, ChronoUnit.MINUTES))
-                .timeoutDuration(Duration.of(15,ChronoUnit.SECONDS))
+                .limitRefreshPeriod(Duration.of(1, ChronoUnit.MINUTES))
+                .timeoutDuration(Duration.of(10,ChronoUnit.SECONDS))
                 .build();
 
         return rateLimiterregistry.rateLimiter("TechNewsLimiter", rateLimiterConfig);
