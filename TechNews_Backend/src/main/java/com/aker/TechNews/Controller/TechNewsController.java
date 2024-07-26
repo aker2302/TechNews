@@ -1,13 +1,21 @@
 package com.aker.TechNews.Controller;
 
-import com.aker.TechNews.Repository.UserRepository;
+import com.aker.TechNews.Repository.NewsLetterSubRepository;
 import com.aker.TechNews.Service.ArticleService;
+import com.aker.TechNews.Service.implementation.EmailSenderService;
 import com.aker.TechNews.entity.Article;
-import com.aker.TechNews.entity.User;
-import com.aker.TechNews.model.UserModel;
+import com.aker.TechNews.entity.NewsLetterSub;
+import com.aker.TechNews.model.MailRequest;
+import com.aker.TechNews.model.SubModel;
 import com.aker.TechNews.response.ApiResponseHandler;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.hibernate.validator.constraints.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +26,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/news")
+@SecurityRequirement(name = "API-Key")
+@Tag(name = "Articles")
 public class TechNewsController {
 
     private static final Logger log = LoggerFactory.getLogger(TechNewsController.class);
@@ -32,72 +44,105 @@ public class TechNewsController {
     private ArticleService articleService;
 
     @Autowired
-    private UserRepository userRepository;
+    private EmailSenderService emailSenderService;
 
+    @Autowired
+    private NewsLetterSubRepository newsLetterSubRepository;
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description= "Articles"),
+            @ApiResponse(responseCode = "401", description= "Not authorized")
+    })
+    @Operation(description = "Allows to fetch articles by pages")
     @RateLimiter(name = "TechNewsLimiter", fallbackMethod = "getArticlesFallbackMethod")
     @GetMapping("/articles/pagination")
     public ResponseEntity<Object> fetchAllArticlesWithPagination(@RequestParam(defaultValue = "0") int page,
-                                                                  @RequestParam(defaultValue = "10") int size){
-        if(size>10)
+                                                                  @RequestParam(defaultValue = "10")@Range(min = 0, max = 10) int pageSize){
+        if(pageSize>10)
             return ResponseEntity.status(406).body("You cannot fetch more than 10 articles  per request");
+        try{
+            Pageable pageable = PageRequest.of(page, pageSize);
+            Page<Article> articles = articleService.getArticlesByPage(pageable);
+            return ApiResponseHandler.handlePageableApiResponse(articles.getNumber(), articles.getTotalPages(), HttpStatus.OK, articles.getContent(), articles.getTotalElements());
+        } catch(IllegalArgumentException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Article> articles = articleService.getArticlesByPage(pageable);
-
-        return ApiResponseHandler.handlePageableApiResponse(articles.getNumber(), articles.getTotalPages(), HttpStatus.OK, articles.getContent(), articles.getTotalElements());
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description= "Articles found"),
+            @ApiResponse(responseCode = "401", description= "Not authorized")
+    })
+    @Operation(description = "Allows to search in articles ")
     @RateLimiter(name = "TechNewsLimiter", fallbackMethod = "getArticlesFallbackMethod")
     @GetMapping("/articles/search")
     public ResponseEntity<Object> fetchArticlesBySearch(@RequestParam(defaultValue = "0") int page,
-                                                        @RequestParam(defaultValue = "10") int size,
+                                                        @RequestParam(defaultValue = "10")@Range(min = 0, max = 10) int pageSize,
                                                         @RequestParam List<String> words){
-        if(size>10)
-            return ResponseEntity.status(406).body("You cannot fetch more than 10 articles  per request");
+        if(pageSize>10)
+            return ResponseEntity.status(406).body("\"You cannot fetch more than 10 articles  per request\"");
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, pageSize);
         Page<Article> articles = articleService.getArticlesBySearch(pageable, words);
+
+        return ApiResponseHandler.handlePageableSearchApiResponse(articles.getNumber(), articles.getTotalPages(), HttpStatus.OK, articles.getContent(), articles.getTotalElements(), words);
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description= "Sorted articles"),
+            @ApiResponse(responseCode = "401", description= "Not authorized")
+    })
+    @Operation(description = "Allows to sort articles by parameter")
+    @RateLimiter(name = "TechNewsLimiter", fallbackMethod = "getArticlesFallbackMethod")
+    @GetMapping("/articles/sorting")
+    public ResponseEntity<Object> fetchArticlesBySorting(@RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "10")@Range(min = 0, max = 10) int pageSize,
+                                                        @RequestParam String[] sort){
+        if(pageSize>10)
+            return ResponseEntity.status(406).body("\"You cannot fetch more than 10 articles per request\"");
+
+        Sort.Direction direction = Sort.Direction.fromString(sort[1]);
+        Sort sortBy = Sort.by(direction, sort[0]);
+        Pageable pageable = PageRequest.of(page, pageSize, sortBy);
+        Page<Article> articles = articleService.getArticlesByPage(pageable);
 
         return ApiResponseHandler.handlePageableApiResponse(articles.getNumber(), articles.getTotalPages(), HttpStatus.OK, articles.getContent(), articles.getTotalElements());
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description= "Subscribed to News Letter"),
+            @ApiResponse(responseCode = "401", description= "Not authorized")
+    })
+    @Operation(description = "Allows user to subscribe to the news letter")
     @RateLimiter(name = "TechNewsLimiter", fallbackMethod = "getArticlesFallbackMethod")
-    @GetMapping("/articles/sorting")
-    public ResponseEntity<Object> fetchArticlesBySoring(@RequestParam(defaultValue = "0") int page,
-                                                        @RequestParam(defaultValue = "10") int size,
-                                                        @RequestParam  String[] sort){
-        if(size>10)
-            return ResponseEntity.status(406).body("You cannot fetch more than 10 articles per request");
+    @PostMapping("/NewsLetter/subscription")
+    public ResponseEntity<Object> subscribeToNewsLetter(@RequestBody SubModel subModel){
+        Map<String, Object> model = new HashMap<>();
+        MailRequest request = new MailRequest();
+        NewsLetterSub user = newsLetterSubRepository.findByEmail(subModel.getEmail()).isPresent() ? newsLetterSubRepository.findByEmail(subModel.getEmail()).get() : null;
+        System.out.println("user = " + user);
+        if(user != null){
+            return ResponseEntity.status(409).body("\"You already registred to the news letter\"");
+        }
+        user = new NewsLetterSub(subModel.getName(),subModel.getEmail());
+        request.setDestination(subModel.getEmail());
+        request.setName(subModel.getName());
+        request.setSubject("Subscribe to News Letter");
+        request.setFrom("technews.newsletter@gmail.com");
+        model.put("Name", subModel.getName());
+        model.put("Email", subModel.getEmail());
+        newsLetterSubRepository.save(user);
+        emailSenderService.sendSubMail(request,model);
 
-        Sort.Direction direction = Sort.Direction.fromString(sort[1]);
-        Sort sortBy = Sort.by(direction, sort[0]);
-        Pageable pageable = PageRequest.of(page, size, sortBy);
-        Page<Article> articles = articleService.getArticlesByPage(pageable);
-
-        return ApiResponseHandler.handlePageableApiResponse(articles.getNumber(), articles.getTotalPages(), HttpStatus.OK, articles.getContent(), articles.getTotalElements());
+        return ResponseEntity.status(HttpStatus.OK).body("\"Thank you, You Subscribed to News Letter\"");
     }
 
     public ResponseEntity<Object> getArticlesFallbackMethod(RequestNotPermitted requestNotPermitted){
         log.info("Fallback method invoked");
         log.info("Request not permitted : {}", requestNotPermitted.getMessage());
-        return ResponseEntity.status(406).body("You Exceeded number of request available in 15min");
+        return ResponseEntity.status(406).body("\"You Exceeded number of request available in 15 min\"");
     }
 
-    @PostMapping("/user/create")
-    public ResponseEntity<Object> createUser(@RequestBody UserModel userModel){
-        User user = userRepository.findByEmail(userModel.getEmail()).isPresent() ? userRepository.findByEmail(userModel.getEmail()).get() : null;
-        if(user != null){
-            return ResponseEntity.status(409).body("User already exist");
-        }
-        user = new User();
-        user.setName(userModel.getName());
-        user.setEmail(userModel.getEmail());
-        String apikey = UUID.randomUUID().toString();
-        user.setApiKey(apikey);
-
-        userRepository.save(user);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("Here is your api Key: " + apikey);
-    }
 
 }
