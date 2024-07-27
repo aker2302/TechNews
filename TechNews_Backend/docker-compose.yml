@@ -1,0 +1,28 @@
+services:
+  mongo-service:
+    container_name: techNews-Mongo
+    image: mongo
+    ports:
+      - "27018:27017"
+    environment:
+      MONGODB_DB: techNewsDb
+    volumes:
+      - mongoNews:/var/lib/mongo/data
+    networks:
+      - techNews-network
+  spring-boot-app:
+    container_name: News-app
+    image: 0db2bbdc7076
+    ports:
+      - "8090:8080"
+    networks:
+      - techNews-network
+    depends_on:
+      - mongo-service
+
+volumes:
+  mongoNews:
+
+networks:
+  techNews-network:
+    driver: bridge
