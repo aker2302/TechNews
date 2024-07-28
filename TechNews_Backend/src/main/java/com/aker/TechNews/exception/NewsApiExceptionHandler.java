@@ -37,6 +37,6 @@ public class NewsApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An internal server error occurred" + ex.getCause());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An internal server error occurred " + ex);
     }
 }
