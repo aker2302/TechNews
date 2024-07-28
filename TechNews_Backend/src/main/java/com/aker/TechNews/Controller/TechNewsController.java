@@ -50,8 +50,10 @@ public class TechNewsController {
     private NewsLetterSubRepository newsLetterSubRepository;
 
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description= "Articles"),
-            @ApiResponse(responseCode = "401", description= "Not authorized")
+            @ApiResponse(responseCode = "200", description= "Articles found"),
+            @ApiResponse(responseCode = "401", description= "Not authorized"),
+            @ApiResponse(responseCode = "406", description= "Invalid page size"),
+            @ApiResponse(responseCode = "500", description= "Internal server error")
     })
     @Operation(description = "Allows to fetch articles by pages")
     @RateLimiter(name = "TechNewsLimiter", fallbackMethod = "getArticlesFallbackMethod")
@@ -66,6 +68,11 @@ public class TechNewsController {
             return ApiResponseHandler.handlePageableApiResponse(articles.getNumber(), articles.getTotalPages(), HttpStatus.OK, articles.getContent(), articles.getTotalElements());
         } catch(IllegalArgumentException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "\"An error occurred while fetching articles\"", e);
         }
 
     }
@@ -152,10 +159,6 @@ public class TechNewsController {
             NewsLetterSub user = newsLetterSubRepository.findByEmail(subModel.getEmail())
                     .orElse(null);
 
-            if (user != null) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("\"You already registered to the news letter\"");
-            }
-
             user = new NewsLetterSub(subModel.getName(), subModel.getEmail());
             request.setDestination(subModel.getEmail());
             request.setName(subModel.getName());
@@ -167,7 +170,7 @@ public class TechNewsController {
             newsLetterSubRepository.save(user);
             emailSenderService.sendSubMail(request, model);
 
-            return ResponseEntity.status(HttpStatus.OK).body("\"Thank you, You Subscribed to News Letter\"");
+            return ApiResponseHandler.handleSubscriptionApiResponse(HttpStatus.OK,"Thank you, You Subscribed to NewsLetter");
 
         } catch (ResponseStatusException e) {
             throw e;

@@ -46,4 +46,16 @@ public class ApiResponseHandler {
 
         return new ResponseEntity<>(response, status);
     }
+
+    public static ResponseEntity<Object> handleSubscriptionApiResponse(
+            HttpStatus status,
+            String message
+    ){
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", message);
+        response.put("status", status);
+
+
+        return new ResponseEntity<>(response, status);
+    }
 }
