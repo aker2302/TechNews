@@ -72,7 +72,7 @@ public class ApiProxyController {
         } catch (RestClientException e) {
             // Log the error and return appropriate response
             log.error("API request failed: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("An error occurred while processing the request.");
+            return ResponseEntity.status(500).body("An error occurred while processing the request." + e.getCause());
         }
     }
 
