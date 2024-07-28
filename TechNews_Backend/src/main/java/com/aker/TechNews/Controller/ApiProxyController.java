@@ -58,6 +58,8 @@ public class ApiProxyController {
 
         try {
             ResponseEntity<Object> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, Object.class);
+            System.out.println("response = " + response);
+            System.out.println("Url = " + apiUrl);
             return response;
         } catch (HttpClientErrorException e) {
             // Log the error and return appropriate response
@@ -101,6 +103,7 @@ public class ApiProxyController {
         try {
             ResponseEntity<Object> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, Object.class);
             System.out.println("response = " + response);
+            System.out.println("Url = " + apiUrl);
             return response;
         } catch (HttpClientErrorException e) {
             log.error("API request failed with status code: {}", e.getStatusCode(), e);

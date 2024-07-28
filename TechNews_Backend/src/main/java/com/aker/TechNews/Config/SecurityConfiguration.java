@@ -41,7 +41,7 @@ public class SecurityConfiguration {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
+                registry.addMapping("/**")
                         .allowedOrigins(FRONT_END_URL)
                         .allowedMethods("GET", "POST")
                         .allowedHeaders("*")
