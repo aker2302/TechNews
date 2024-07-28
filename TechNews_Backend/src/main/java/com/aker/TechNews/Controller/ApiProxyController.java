@@ -53,6 +53,8 @@ public class ApiProxyController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("API-KEY", apiKey);
+        System.out.println("URI = " + apiUrl + " ---- type ");
+        log.error("URI = " + apiUrl);
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -89,6 +91,8 @@ public class ApiProxyController {
         if (user != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("\"You already registered to the Newsletter\"");
         }
+        System.out.println("URI = " + apiUrl);
+        log.error("URI = " + apiUrl);
 
         String requestBody;
         try {
