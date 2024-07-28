@@ -8,7 +8,7 @@ spring:
       username: ${PROD_DB_USERNAME}
       password: ${PROD_DB_PASSWORD}
       database: ${PROD_DB_NAME}
-      port: 27017
+      port: ${PROD_DB_HOST}
       host: ${PROD_DB_HOST}
   application:
     name: TechNews_Backend
@@ -17,7 +17,7 @@ spring:
     host: smtp.gmail.com
     username: ${EMAIL_ADDRESS}
     password: ${EMAIL_ACCESS_TOKEN}
-    port: 55923
+    port: ${EMAIL_SERVICE_PORT}
     protocol: smtp
     properties.mail.smtp:
       auth: true
