@@ -13,7 +13,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/v1")
@@ -29,14 +30,17 @@ public class ApiProxyController {
     private final String host = System.getenv("HOST");
 
     @GetMapping("/public/getarticles")
-    public ResponseEntity<Object> serveArticles(@RequestParam String keywords,
+    public ResponseEntity<Object> serveArticles(@RequestParam List<String> keywords,
                                                 @RequestParam(defaultValue = "10")@Range(min = 0, max = 10) int pageSize,
                                                 @RequestParam(defaultValue = "0") int page){
         String apiUrl;
         if (keywords == null || keywords.isEmpty()) {
             apiUrl = host + "/articles/pagination?" + "pageSize=" + pageSize + "&page=" + page ;
         } else {
-            apiUrl = host + "/articles/search?page=" + page + "&pageSize=" + pageSize + "&words=" + keywords;
+            String words = keywords.stream()
+                    .map(keyword -> "" + keyword + "")
+                    .collect(Collectors.joining(","));
+            apiUrl = host + "/articles/search?page=" + page + "&pageSize=" + pageSize + "&words=" + words;
         }
 
         HttpHeaders headers = new HttpHeaders();

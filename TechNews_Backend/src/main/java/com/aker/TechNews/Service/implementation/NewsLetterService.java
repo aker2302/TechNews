@@ -22,8 +22,10 @@ public class NewsLetterService implements Runnable {
 
     private final String FRONT_END_URL = System.getenv("FRONT_END_URL");
 
+    private static final long THREE_HOURS_IN_MILLISECONDS = 3 * 60 * 60 * 1000;
+
     @Override
-    @Scheduled(initialDelay = 1L ,fixedRate = 24 * 60 * 60 * 1000)
+    @Scheduled(initialDelay = THREE_HOURS_IN_MILLISECONDS ,fixedRate = 24 * 60 * 60 * 1000)
     public void run() {
         sendNewsLetter();
     }
