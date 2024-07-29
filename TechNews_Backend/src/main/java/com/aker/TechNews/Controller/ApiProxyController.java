@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/v1/proxy")
 @Tag(name = "Public Api Articles")
 public class ApiProxyController {
 
@@ -54,7 +54,7 @@ public class ApiProxyController {
         HttpHeaders headers = new HttpHeaders();
         headers.add("API-KEY", apiKey);
         System.out.println("URI = " + apiUrl + " ---- type ");
-        log.error("URI = " + apiUrl);
+        log.info("URI = " + apiUrl);
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -62,12 +62,8 @@ public class ApiProxyController {
             ResponseEntity<Object> response = restTemplate.exchange(apiUrl, HttpMethod.GET, entity, Object.class);
             System.out.println("response = " + response);
             System.out.println("Url = " + apiUrl);
-            return response;
+            return ResponseEntity.ok().body(response.getBody());
         } catch (HttpClientErrorException e) {
-            // Log the error and return appropriate response
-            log.error("API request failed with status code: {}", e.getStatusCode(), e);
-            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
-        } catch (HttpStatusCodeException e) {
             // Log the error and return appropriate response
             log.error("API request failed with status code: {}", e.getStatusCode(), e);
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
@@ -108,11 +104,8 @@ public class ApiProxyController {
             ResponseEntity<Object> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, Object.class);
             System.out.println("response = " + response);
             System.out.println("Url = " + apiUrl);
-            return response;
+            return ResponseEntity.ok().body(response.getBody());
         } catch (HttpClientErrorException e) {
-            log.error("API request failed with status code: {}", e.getStatusCode(), e);
-            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
-        } catch (HttpStatusCodeException e) {
             log.error("API request failed with status code: {}", e.getStatusCode(), e);
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
         } catch (RestClientException e) {
