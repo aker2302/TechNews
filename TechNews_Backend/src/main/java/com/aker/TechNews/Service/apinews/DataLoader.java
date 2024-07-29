@@ -35,12 +35,12 @@ public class DataLoader implements Runnable{
     @Override
     @Scheduled(initialDelay = 0, fixedRate = 24 * 60 * 60 * 1000)
     public void run() {
-        /*deleteOldArticles();
+        deleteOldArticles();
         try {
             updateDatabase(PAUSE_TIME);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        }*/
+        }
     }
 
     public void updateDatabase(int pauseTime) throws InterruptedException {
