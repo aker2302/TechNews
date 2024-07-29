@@ -5,7 +5,7 @@ and stay updated with the most recent technology trends.
 This project includes a backend API to manage news articles and a front-end interface for users to interact with the application.
 You can check documentaion via this link:
 [Documentation](https://technews-production.up.railway.app/swagger-ui/index.html#/)
-![alt DOC_img](TechNews_Backend/src/main/resources/static/Capture d’écran 2024-07-29 à 02.51.27.png)
+![alt DOC_img](https://raw.githubusercontent.com/aker2302/TechNews/main/TechNews_Backend/src/main/resources/static/Capture%20d%E2%80%99%C3%A9cran%202024-07-29%20%C3%A0%2002.51.27.png)
 You can find front-End implementation here: [Front-end](https://github.com/aker2302/NewsTech_FrontEnd)
 ## Features
  - News Aggregation: Fetches and displays tech news articles based on user-specified keywords.
