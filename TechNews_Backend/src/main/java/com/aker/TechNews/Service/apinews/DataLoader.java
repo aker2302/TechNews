@@ -16,9 +16,9 @@ public class DataLoader implements Runnable{
 
     private int API_CALLS_ITERATION = 1;
 
-    private int API_CALLS_LIMIT = 200;
+    private int API_CALLS_LIMIT = 150;
 
-    private int MAX_ARTICLES_TO_LOAD = 2000;
+    private int MAX_ARTICLES_TO_LOAD = 1500;
 
     private int ARTICLES_PER_PAGE = 10;
 
